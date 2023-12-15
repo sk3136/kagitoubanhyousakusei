@@ -235,7 +235,6 @@
 
         // 担当する人全員の当番の日数がほぼ均等（1日差まで許容）か判定する変数をfalseにする
         var equal = false;
-
         // equalがfalseの間繰り返す
         while (equal == false) {
             // 当番表　例　[a3,a0,a1,a2] の場合1日目はa3 2日目はa0 3日目はa1 4日目はa2 が当番表に表示される
@@ -318,10 +317,21 @@
             newCell.appendChild(newText);
             newCell_2.appendChild(newText_2);
         }
-        table.style.display = 'inline-block';
+        div_result = document.getElementById('result');
+        div_result.style.display = 'inline-block';
         // 決定ボタン
         var div_create = document.getElementById('create');
         div_create.style.display = 'none';
+    }
+
+    // もう一度当番表を作る
+    function onemore() {
+        var table = document.getElementById('table');
+        var second_table_row = table.rows;
+        for (var i = second_table_row.length - 1; i >= 1; i--) {
+            table.deleteRow(i);
+        }
+        result();
     }
 </script>
 <style>
@@ -369,6 +379,7 @@ div {
 }
 input {
     font-size: 25px;
+    width: 230px;
 }
 .calendar {
     display: inline-block;
@@ -380,15 +391,13 @@ input {
 .last_calendar {
     /*vertical-align　縦の位置を指定する　topなのでtableの上辺に合わせる*/
     vertical-align: top;
+    display: inline-block;
 }
 .start {
     display: block;
 }
 .member_count {
     display: inline;
-}
-.member_input {
-    width: 230px;
 }
 </style>
 </head>
@@ -439,12 +448,15 @@ input {
 <button onclick="result()">決定</button>
 </div>
 
+<!-- 当番表 -->
+<div id="result">
 <table id="table" class="last_calendar">
     <tr>
         <th>日（曜日）</th>
         <th><a id="month"></a>月</th>
     </tr>
 </table>
-</table>
+<button onclick="onemore()">もう一度作る</button>
+</div>
 </body>
 </html>
