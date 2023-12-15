@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<!--lang="ja"言語を日本語に設定する（これがないとブラウザが言語を間違えることがある）-->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>鍵当番表作成アプリ</title>
+<script>
+    // ページが読み込まれたとき、担当する人の人数・年・月の選択画面を表示する
+    window.onload = function addOption() {
+        // 現在の年月日を取得
+        var now = new Date();
+        // nowから年を取得
+        var year = now.getFullYear();
+        // nowから月を取得1月が0なので+1
+        var month = now.getMonth() + 1;
+
+        // 担当する人の人数を入力するセレクトボックスを表示する
+        for (var i = 1; i < 29; i++) {
+            var select = document.getElementById("member");
+            var option = document.createElement("option");
+            option.text = i;
+            option.value = i;
+            select.appendChild(option);
+        }
+
+        // 現在の年と次の年までのセレクトボックスを表示する
+        for (var i = year; i < year + 2; i++) {
+            var select = document.getElementById("select_year");
+            var option = document.createElement("option");
+            option.text = i;
+            option.value = i;
+            select.appendChild(option);
+            // 現在の年と選択された年が同じなら
+            if (option.value == year) {
+                // 現在の年が選択された状態にする
+                option.setAttribute("selected", true);
+            }
+        }
+        
+        // 1から12月までのセレクトボックスを表示する
+        for (var i = 1; i < 13; i++) {
+            var select = document.getElementById("select_month");
+            var option = document.createElement("option");
+            option.text = i;
+            option.value = i;
+            select.appendChild(option);
+            // 現在の年と選択された月が同じなら
+            if (option.value == month) {
+                // 現在の月が選択された状態にする
+                option.setAttribute("selected", true);
+            }
+        }
+    }
+
+    // 選択された年
+    var year_selected = 0;
+    // 送られてきた月の日数を返す
+    function month_days_Number(select_month) {
+        if (select_month == 1 || select_month == 3 || select_month == 5 || select_month == 7 || select_month == 8 || select_month == 10 || select_month == 12 || select_month == 13) {
+            return 31;
+        } else if (select_month == 4 || select_month == 6 || select_month == 9 || select_month == 11) {
+            return 30;
+        } else if (year_selected % 4 == 0 && year_selected % 100 != 0 || year_selected % 400 == 0) {
+            return 29;
+        } else {
+            return 28;
+        }
+    }
+
+    function make_calendar(month_Number) {
+        // calendarというidの付いた要素（カレンダー）を取得する
+        let calendar = document.getElementById('calendar');
+        // 選択した月の初日の曜日
+        var first_dayOfWeek = new Date(year_selected, month_Number, 1).getDay();
+        var last_day = month_days_Number(month_Number + 1);
+        var date = 1 - first_dayOfWeek;
+        while (date <= last_day) {
+            // カレンダーの行を取得（カレンダーにカレンダーの行を追加する）
+            let newRow = calendar.insertRow();
+            for (var i = 0; i < 7; i++) {
+                // カレンダーのセルを取得（カレンダーの行にカレンダーのセルを追加する）
+                let newCell = newRow.insertCell();
+                // セルのテキストの数値が1以上かつlast_day以下なら
+                if (date >= 1 && date <= last_day) {
+                    // newCellにid（i）を付与する　setAttribute('付与する属性の名前',属性の中身);　setAttribute('idを',iから曜日で増えた日数を引いた数値にする')
+                    newCell.setAttribute('id',date);
+                    // セルがクリックされたとき
+                    newCell.onclick = function() {
+                        // this(newCell)のクラスをredに変える　クラスがついているならクラスを無くす
+                        this.classList.toggle("red");
+                    }
+                    let newText = document.createTextNode(date);
+                    // カレンダーのセルにテキストを入れる
+                    newCell.appendChild(newText);
+                }
+                date++;
+            }
+        }
+    }
+
+    // 入力された担当する人の人数
+    var member_count = 0;
+    function member_list() {
+        // セレクトボックスに入力された人数をmember_countに入れる
+        member_count = Number(document.getElementById("member").value);
+        document.getElementById('member_Number').textContent = 1;
+        // startというidの付いた要素（担当する人の人数・年・月の登録画面）を取得する
+        var div_start = document.getElementById("start");
+        // startというidの付いた要素（担当する人の人数・年・月の登録画面）を隠す
+        div_start.style.display = 'none';
+        // 担当する人の名前の登録画面
+        var list = document.getElementById("list");
+        list.style.display = 'block';
+    }
+
+    // 表示される担当する人の名前
+    var member = [];
+    function member_name() {
+        for (var i = 0; i < member.length; i++) {
+            // これまでに入力された名前と入力された名前が重複した時
+            if (document.getElementById("member_list").value.trim() == member[i]) {
+                document.getElementById("member_list").value = '';
+                alert('その名前は既に入力されています。');
+                // returnで何も返さない場合関数を終了する
+                return;
+            }
+        }
+        // 入力された名前から空白を取り除いたとき、文字数が0ではないなら
+        if (document.getElementById("member_list").value.trim().length != 0) {
+            // 入力された名前をmemberに追加する
+            member.push(document.getElementById("member_list").value);
+            // 名前を入力される度に何人目かの表示を変更する
+            document.getElementById('member_Number').textContent = member.length + 1;
+            // テキストボックスに入力された名前を消す
+            document.getElementById("member_list").value = '';
+            // 人数回名前を入力されたら
+            if (member.length == member_count) {
+                calendar_option();
+            }
+        } else {
+            document.getElementById("member_list").value = '';
+            alert('名前を入力してください。');
+        }
+    }
+
+    // 選択された月
+    var month_selected = 0;
+    // 入れない日付けを設定するカレンダーを作る
+    function calendar_option() {
+        year_selected = Number(document.getElementById("select_year").value);
+        month_selected = Number(document.getElementById("select_month").value);
+        // カレンダーの上に表示されている月を選択された月にする
+        document.getElementById('month_calendar').textContent = month_selected;
+        // 当番表に表示されている月を選択された月にする
+        document.getElementById('month').textContent = month_selected;
+        document.getElementById('impossible').textContent = member[0];
+        // registration_sceneというidの付いた要素（不可日の登録画面）を取得する
+        var registration_scene = document.getElementById("registration_scene");
+        // registration_sceneというidの付いた要素（不可日の登録画面）を表示する
+        registration_scene.style.display = 'block';
+        // 担当する人の名前の登録画面
+        var list = document.getElementById("list");
+        list.style.display = 'none';
+
+        make_calendar(month_selected - 1);
+        
+    }
+
+    // 一人一人の入れない日付けを一時的に保存する 例 [1,3,5]と入力された場合1,3,5日に入れないということ
+    var impossible = [];
+    // 担当する人全員の入れない日付けを保存する 例　[[1,3,5],[2,4,6]]と入力された場合一人目の担当する人が1,3,5日に入れない、二人目の担当する人が2,4,6日に入れないということ
+    var member_day = [];
+    // 関数calendar_optionで設定した入れない日付けを変数に入力する
+    function redday() {
+        // カレンダーでクリックされたセル（redというClassを持っているセル）を取得する
+        var red = document.getElementsByClassName("red");
+        // 不可日の登録画面
+        var registration_scene = document.getElementById("registration_scene");
+        // createというidの付いた要素（決定ボタン画面）を取得する
+        var div_create = document.getElementById("create");
+
+        // impossibleを初期化する
+        impossible = [];
+        for (var i = 0; i < red.length; i++) {
+            // red のセルのidの値をimpossibleに追加する
+            impossible.push(red[i].id);
+        }
+        // member_dayにimpossibleを追加する
+        member_day.push(impossible);
+
+        for (var i = red.length - 1; i >= 0; i--) {
+            // remove 要素からクラスを削除する
+            red[i].classList.remove("red");
+        }
+        // 担当する人の人数回分関数reddayが実行されたなら
+        if (member_count == member_day.length) {
+            // 不可日の登録画面を隠す
+            registration_scene.style.display = 'none';
+            // 決定ボタンを表示する
+            div_create.style.display = 'block';
+        }
+        // 表示している担当する人の名前を関数reddayが実行されるたびに次の人に変更する
+        document.getElementById('impossible').textContent = member[member_day.length];
+    }
+
+    // その月の登録をもう一度やり直す
+    function restart() {
+        // 不可日の登録画面
+        var registration_scene = document.getElementById("registration_scene");
+        // 決定ボタン
+        var div_create = document.getElementById("create");
+        // 担当する人の人数・年・月の登録画面
+        var div_start = document.getElementById("start");
+        registration_scene.style.display = 'block';
+        div_create.style.display = 'none';
+        div_start.style.display = 'none';
+        // 表示されている担当する人の名前を元に戻す
+        document.getElementById('impossible').textContent = member[0];
+        member_day = [];
+    }
+
+    // 当番表を作り、表示する
+    function result() {
+        // 一か月目の日数
+        var month_days = month_days_Number(month_selected);
+
+        // 担当する人一人が休める日数よりも関数reddayで設定した担当する人の入れない日付けが多ければ 例　日数が60日、担当する人が15人の場合　日数(60) - 担当する人一人あたりが休める日数(60/15) < 休みたい日数(56)
+        for (var f = member_count - 1; f >= 0; f--) {
+            if (month_days - Math.floor(month_days / member_count) < member_day[f].length) {
+                alert('全員に平等に当番を分けられません。やり直してください。')
+                restart();
+            }
+        }
+
+        // 担当する人全員の当番の日数がほぼ均等（1日差まで許容）か判定する変数をfalseにする
+        var equal = false;
+
+        // equalがfalseの間繰り返す
+        while (equal == false) {
+            // 当番表　例　[a3,a0,a1,a2] の場合1日目はa3 2日目はa0 3日目はa1 4日目はa2 が当番表に表示される
+            var touban = [];
+            // 担当する人が当番に入る日数をそれぞれ数える　例　[1,2,3] の場合 一人目の担当する人が一日、二人目の担当する人が二日、三人目の担当する人が三日間当番に入ったということ
+            var touban_count = [];
+            // その日に当番に入れる担当する人　例　[0,2,3] の場合番号が0,2,3の担当する人はその日に当番に入れるということ
+            var possible = [];
+            // 担当する人が当番に入った日数をそれぞれ0にする
+            for (var i = 0; i < member_count; i++) {
+                touban_count.push(0);
+            }
+
+            for (var date = 1; date < month_days + 1; date++) {
+                possible = [];
+                // 担当する人全員をpossibleに追加する
+                for (var n = 0; n < member_count; n++) {
+                    possible.push(n);
+                }
+                for (var remove_member = member_count - 1; remove_member >= 0; remove_member--) {
+                    // ceil 小数点以下の切り上げ
+                    // すでに担当する人一人が当番に入る最大日数に達している人を候補から消していく
+                    if (Math.ceil(month_days / member_count) == touban_count[remove_member]) {
+                        possible.splice(remove_member,1);
+                    }
+                    // 関数reddayで設定した担当する人の入れない日付けとdateが等しいときその担当する人を候補から消していく
+                    for (var j = 0; j < member_day[remove_member].length; j++) {
+                        if (date == member_day[remove_member][j]) {
+                            // splice(何番目の要素から,いくつ削除する)
+                            possible.splice(remove_member,1);
+                            break;
+                        }
+                    }
+                }
+
+                // 全ての担当する人が候補から外されたなら
+                if (possible.length == 0) {
+                    alert('全員が当番に出られない日があります。やり直してください。')
+                    restart();
+                    // この関数をリセットする
+                    reload();
+                }
+
+                // Math.floor　小数点以下を切り捨て　Math.random() 0からpossible.length未満の値の整数の乱数を作る
+                var random = Math.floor(Math.random() * possible.length);
+                // ランダムに選ばれた0~possible.length未満の値の整数をtoubanに追加
+                touban.push(possible[random]);
+                // 担当する人ごとの割り振られた日数を1増やす
+                touban_count[possible[random]]++
+            }
+
+            for (var i = 0; i < member_count; i++) {
+                // 担当する人全員の当番の日数がほぼ均等（1日差まで許容）なら
+                if (touban_count[i] == Math.floor(month_days / member_count) || touban_count[i] == Math.floor(month_days / member_count) + 1) {
+                    equal = true;
+                } else {
+                    equal = false;
+                    break;
+                }
+            }
+        }
+
+        var dayOfWeek_kanji = ['日','月','火','水','木','金','土'];
+        let table = document.getElementById('table');
+        for (var i = 1; i < month_days + 1; i++) {
+            // テーブルの行を取得する
+            let newRow = table.insertRow();
+            // テーブルの左のセルを取得する
+            let newCell = newRow.insertCell();
+            // テーブルの右のセルを取得する
+            let newCell_2 = newRow.insertCell();
+            // セルの日付の曜日を取得する
+            var dayOfWeek_now = new Date(year_selected, month_selected - 1, i).getDay();
+            // セルの日付の曜日を漢字に直す
+            var dayOfWeek_indication = '(' + dayOfWeek_kanji[dayOfWeek_now] + ')';
+            // 日付と曜日の文字列を作る
+            let newText = document.createTextNode(i + dayOfWeek_indication);
+            // toubanの中身を名前に置き換えた文字列を作る
+            let newText_2 = document.createTextNode(member[touban[i - 1]]);
+            newCell.appendChild(newText);
+            newCell_2.appendChild(newText_2);
+        }
+        table.style.display = 'inline-block';
+        // 決定ボタン
+        var div_create = document.getElementById('create');
+        div_create.style.display = 'none';
+    }
+</script>
+<style>
+body {
+    font-family: sans-serif;
+    margin: 0px;
+    text-align: center;
+}
+h1 {
+    background-color: #00d5ff;
+    color: #000000;
+    margin: 0px;
+}
+table {
+    margin-top: 10px;
+    border-collapse: collapse;
+    font-size: 20px;
+    display: none;
+}
+th {
+    border:1px rgb(158, 158, 158) solid;
+}
+td {
+    border:1px rgb(158, 158, 158) solid;
+    background-color: #ffffff;
+}
+button {
+    font-size: 20px;
+    display: block;
+    margin: auto;
+    margin-top: 10px;
+}
+p {
+    font-size: 30px;
+    margin: 0px;
+}
+select {
+    font-size: 25px;
+}
+label {
+    font-size: 25px;
+}
+div {
+    display: none;
+}
+input {
+    font-size: 25px;
+}
+.calendar {
+    display: inline-block;
+    font-size: 30px;
+}
+.red {
+    background-color: #ff0000;
+}
+.last_calendar {
+    /*vertical-align　縦の位置を指定する　topなのでtableの上辺に合わせる*/
+    vertical-align: top;
+}
+.start {
+    display: block;
+}
+.member_count {
+    display: inline;
+}
+.member_input {
+    width: 230px;
+}
+</style>
+</head>
+<body>
+<h1>鍵当番表作成アプリ</h1>
+
+<!-- 人数・年・月の登録画面 -->
+<div id="start" class="start">
+<p>鍵当番を担当する人の<br>人数を入力してください</p>
+<select id="member"></select>
+<label for="member">人</label>
+<p>当番表を作る年と月を<br>選んでください</p>
+<select id="select_year"></select>
+<label for="select_year">年</label>
+<select id="select_month"></select>
+<label for="select_month">月</label>
+<button onclick="member_list()">登録</button>
+</div>
+
+<!-- 担当する人の名前の登録画面 -->
+<div id="list" class="list">
+<p><a id="member_Number"></a>人目</p>
+<input type="text" id="member_list">
+<label for="member_list">さん</label>
+<button onclick="member_name()">登録</button>
+</div>
+
+<!-- 不可日の登録画面 -->
+<div id="registration_scene">
+<p><a id="month_calendar"></a>月</p>
+<p><a id="impossible"></a>さんの不可日</p>
+<table id="calendar" class="calendar">
+    <tr>
+        <th>日</th>
+        <th>月</th>
+        <th>火</th>
+        <th>水</th>
+        <th>木</th>
+        <th>金</th>
+        <th>土</th>
+    </tr>
+</table>
+<button id="registration" onclick="redday()">登録</button>
+</div>
+
+<!-- 当番表を作るボタンの画面 -->
+<div id="create">
+<button onclick="result()">決定</button>
+</div>
+
+<table id="table" class="last_calendar">
+    <tr>
+        <th>日（曜日）</th>
+        <th><a id="month"></a>月</th>
+    </tr>
+</table>
+</table>
+</body>
+</html>
