@@ -254,6 +254,15 @@
                 for (var n = 0; n < member_count; n++) {
                     possible.push(n);
                 }
+                if (member_count >= 2 && date >= 3) {
+                    for (var remove_member = member_count - 1; remove_member >= 0; remove_member--) {
+                        // toubanの中身が三日間分同じなら
+                        if (remove_member == touban[date - 2] && remove_member == touban[date - 3]) {
+                            possible.splice(remove_member,1);
+                            break;
+                        }
+                    }
+                }
                 for (var remove_member = member_count - 1; remove_member >= 0; remove_member--) {
                     // ceil 小数点以下の切り上げ
                     // すでに担当する人一人が当番に入る最大日数に達している人を候補から消していく
@@ -396,9 +405,6 @@ input {
 .start {
     display: block;
 }
-.member_count {
-    display: inline;
-}
 </style>
 </head>
 <body>
@@ -418,7 +424,7 @@ input {
 </div>
 
 <!-- 担当する人の名前の登録画面 -->
-<div id="list" class="list">
+<div id="list">
 <p><a id="member_Number"></a>人目</p>
 <input type="text" id="member_list">
 <label for="member_list">さん</label>
@@ -458,5 +464,6 @@ input {
 </table>
 <button onclick="onemore()">もう一度作る</button>
 </div>
+
 </body>
 </html>
