@@ -254,15 +254,6 @@
                 for (var n = 0; n < member_count; n++) {
                     possible.push(n);
                 }
-                if (member_count >= 2 && date >= 3) {
-                    for (var remove_member = member_count - 1; remove_member >= 0; remove_member--) {
-                        // toubanの中身が三日間分同じなら
-                        if (remove_member == touban[date - 2] && remove_member == touban[date - 3]) {
-                            possible.splice(remove_member,1);
-                            break;
-                        }
-                    }
-                }
                 for (var remove_member = member_count - 1; remove_member >= 0; remove_member--) {
                     // ceil 小数点以下の切り上げ
                     // すでに担当する人一人が当番に入る最大日数に達している人を候補から消していく
@@ -273,6 +264,16 @@
                     for (var j = 0; j < member_day[remove_member].length; j++) {
                         if (date == member_day[remove_member][j]) {
                             // splice(何番目の要素から,いくつ削除する)
+                            possible.splice(remove_member,1);
+                            break;
+                        }
+                    }
+                }
+                // 担当する人が2人以上かつ三日目以降の担当決めかつ担当する人の候補が2人以上残っているなら
+                if (member_count >= 2 && date >= 3 && possible.length >= 2) {
+                    for (var remove_member = member_count - 1; remove_member >= 0; remove_member--) {
+                        // toubanの中身が三日間分同じなら
+                        if (remove_member == touban[date - 2] && remove_member == touban[date - 3]) {
                             possible.splice(remove_member,1);
                             break;
                         }
