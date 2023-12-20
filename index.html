@@ -269,13 +269,23 @@
                         }
                     }
                 }
-                // 担当する人が2人以上かつ三日目以降の担当決めかつ担当する人の候補が2人以上残っているなら
-                if (member_count >= 2 && date >= 3 && possible.length >= 2) {
-                    for (var remove_member = member_count - 1; remove_member >= 0; remove_member--) {
-                        // toubanの中身が三日間分同じなら
-                        if (remove_member == touban[date - 2] && remove_member == touban[date - 3]) {
-                            possible.splice(remove_member,1);
-                            break;
+                // 担当する人の候補が2人以上残っているなら
+                if (possible.length >= 2) {
+                    // 担当する人が2人かつ三日目以降の担当決めなら
+                    if (member_count == 2 && date >= 3) {
+                        for (var remove_member = member_count - 1; remove_member >= 0; remove_member--) {
+                            // toubanの中身が前回二日間分同じなら
+                            if (remove_member == touban[date - 2] && remove_member == touban[date - 3]) {
+                                possible.splice(remove_member,1);
+                                break;
+                            }
+                        }
+                    } else if (member_count >= 3 && date >= 2) {
+                        for (var remove_member = member_count - 1; remove_member >= 0; remove_member--) {
+                            if (remove_member == touban[date - 2]) {
+                                possible.splice(remove_member,1);
+                                break;
+                            }
                         }
                     }
                 }
