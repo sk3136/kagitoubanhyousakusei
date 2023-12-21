@@ -243,6 +243,8 @@
             var touban_count = [];
             // その日に当番に入れる担当する人　例　[0,2,3] の場合番号が0,2,3の担当する人はその日に当番に入れるということ
             var possible = [];
+            // 担当する人がひと月の日数以上に選ばれたかどうかの判定をfalseにする
+            var remainder = false;
             // 担当する人が当番に入った日数をそれぞれ0にする
             for (var i = 0; i < member_count; i++) {
                 touban_count.push(0);
@@ -255,10 +257,25 @@
                     possible.push(n);
                 }
                 for (var remove_member = member_count - 1; remove_member >= 0; remove_member--) {
-                    // ceil 小数点以下の切り上げ
-                    // すでに担当する人一人が当番に入る最大日数に達している人を候補から消していく
-                    if (Math.ceil(month_days / member_count) == touban_count[remove_member]) {
-                        possible.splice(remove_member,1);
+                    if (remainder == false) {
+                        // ceil 小数点以下の切り上げ
+                        // すでに担当する人一人が当番に入る最大日数に達している人を候補から消していく
+                        if (Math.ceil(month_days / member_count) == touban_count[remove_member]) {
+                            possible.splice(remove_member,1);
+                        }
+                        var over_count = 0;
+                        for (var n = 0; n < member_count; n++) {
+                            if (touban_count[n] == Math.floor(month_days / member_count) + 1) {
+                                over_count++
+                            }
+                        }
+                        if (month_days - member_count == over_count) {
+                            remainder = true;
+                        }
+                    } else {
+                        if (Math.floor(month_days / member_count) == touban_count[remove_member]) {
+                            possible.splice(remove_member,1);
+                        }
                     }
                     // 関数reddayで設定した担当する人の入れない日付けとdateが等しいときその担当する人を候補から消していく
                     for (var j = 0; j < member_day[remove_member].length; j++) {
@@ -269,23 +286,13 @@
                         }
                     }
                 }
-                // 担当する人の候補が2人以上残っているなら
-                if (possible.length >= 2) {
-                    // 担当する人が2人かつ三日目以降の担当決めなら
-                    if (member_count == 2 && date >= 3) {
-                        for (var remove_member = member_count - 1; remove_member >= 0; remove_member--) {
-                            // toubanの中身が前回二日間分同じなら
-                            if (remove_member == touban[date - 2] && remove_member == touban[date - 3]) {
-                                possible.splice(remove_member,1);
-                                break;
-                            }
-                        }
-                    } else if (member_count >= 3 && date >= 2) {
-                        for (var remove_member = member_count - 1; remove_member >= 0; remove_member--) {
-                            if (remove_member == touban[date - 2]) {
-                                possible.splice(remove_member,1);
-                                break;
-                            }
+                // 担当する人が2人以上かつ二日目以降の担当決めかつ担当する人の候補が2人以上残っているなら
+                if (member_count >= 2 && date >= 2/*3*/ && possible.length >= 2) {
+                    for (var remove_member = member_count - 1; remove_member >= 0; remove_member--) {
+                        // toubanの中身が前回と同じなら
+                        if (remove_member == touban[date - 2]/* && remove_member == touban[date - 3]*/) {
+                            possible.splice(remove_member,1);
+                            break;
                         }
                     }
                 }
