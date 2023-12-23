@@ -45,7 +45,7 @@
             option.text = i;
             option.value = i;
             select.appendChild(option);
-            // 現在の年と選択された月が同じなら
+            // 現在の月と選択された月が同じなら
             if (option.value == month) {
                 // 現在の月が選択された状態にする
                 option.setAttribute("selected", true);
@@ -68,11 +68,13 @@
         }
     }
 
+    // 不可日を選ぶためのカレンダーを作る
     function make_calendar(month_Number) {
         // calendarというidの付いた要素（カレンダー）を取得する
         let calendar = document.getElementById('calendar');
         // 選択した月の初日の曜日
         var first_dayOfWeek = new Date(year_selected, month_Number, 1).getDay();
+        // 選択した月の日数
         var last_day = month_days_Number(month_Number + 1);
         var date = 1 - first_dayOfWeek;
         while (date <= last_day) {
@@ -81,8 +83,8 @@
             for (var i = 0; i < 7; i++) {
                 // カレンダーのセルを取得（カレンダーの行にカレンダーのセルを追加する）
                 let newCell = newRow.insertCell();
-                // セルのテキストの数値が1以上かつlast_day以下なら
-                if (date >= 1 && date <= last_day) {
+                // セルのテキストの数値が1以上なら
+                if (date >= 1) {
                     // newCellにid（i）を付与する　setAttribute('付与する属性の名前',属性の中身);　setAttribute('idを',iから曜日で増えた日数を引いた数値にする')
                     newCell.setAttribute('id',date);
                     // セルがクリックされたとき
@@ -101,16 +103,19 @@
 
     // 入力された担当する人の人数
     var member_count = 0;
+    // 担当する人の人数の登録
     function member_list() {
-        // セレクトボックスに入力された人数をmember_countに入れる
+        // セレクトボックスで選択された人数をmember_countに入れる
         member_count = Number(document.getElementById("member").value);
+        // 担当する人の名前の登録画面の◯人目の◯を1にする
         document.getElementById('member_Number').textContent = 1;
         // startというidの付いた要素（担当する人の人数・年・月の登録画面）を取得する
         var div_start = document.getElementById("start");
         // startというidの付いた要素（担当する人の人数・年・月の登録画面）を隠す
         div_start.style.display = 'none';
-        // 担当する人の名前の登録画面
+        // 担当する人の名前の登録画面を取得する
         var list = document.getElementById("list");
+        // 担当する人の名前の登録画面を表示する
         list.style.display = 'block';
     }
 
@@ -120,6 +125,7 @@
         for (var i = 0; i < member.length; i++) {
             // これまでに入力された名前と入力された名前が重複した時
             if (document.getElementById("member_list").value.trim() == member[i]) {
+                // テキストボックスに入力された名前を消す
                 document.getElementById("member_list").value = '';
                 alert('その名前は既に入力されています。');
                 // returnで何も返さない場合関数を終了する
@@ -130,9 +136,8 @@
         if (document.getElementById("member_list").value.trim().length != 0) {
             // 入力された名前をmemberに追加する
             member.push(document.getElementById("member_list").value);
-            // 名前を入力される度に何人目かの表示を変更する
+            // 名前が入力される度に画面上部の◯人目の◯を1ずつ変える
             document.getElementById('member_Number').textContent = member.length + 1;
-            // テキストボックスに入力された名前を消す
             document.getElementById("member_list").value = '';
             // 人数回名前を入力されたら
             if (member.length == member_count) {
@@ -146,7 +151,7 @@
 
     // 選択された月
     var month_selected = 0;
-    // 入れない日付けを設定するカレンダーを作る
+    // 入れない日付けを設定するカレンダーを表示する準備をする
     function calendar_option() {
         year_selected = Number(document.getElementById("select_year").value);
         month_selected = Number(document.getElementById("select_month").value);
@@ -171,7 +176,7 @@
     var impossible = [];
     // 担当する人全員の入れない日付けを保存する 例　[[1,3,5],[2,4,6]]と入力された場合一人目の担当する人が1,3,5日に入れない、二人目の担当する人が2,4,6日に入れないということ
     var member_day = [];
-    // 関数calendar_optionで設定した入れない日付けを変数に入力する
+    // 関数make_calendarで設定した入れない日付けを変数に入力する
     function redday() {
         // カレンダーでクリックされたセル（redというClassを持っているセル）を取得する
         var red = document.getElementsByClassName("red");
@@ -204,7 +209,7 @@
         document.getElementById('impossible').textContent = member[member_day.length];
     }
 
-    // その月の登録をもう一度やり直す
+    // 不可日の登録をもう一度やり直す
     function restart() {
         // 不可日の登録画面
         var registration_scene = document.getElementById("registration_scene");
@@ -225,7 +230,7 @@
         // 一か月目の日数
         var month_days = month_days_Number(month_selected);
 
-        // 担当する人一人が休める日数よりも関数reddayで設定した担当する人の入れない日付けが多ければ 例　日数が60日、担当する人が15人の場合　日数(60) - 担当する人一人あたりが休める日数(60/15) < 休みたい日数(56)
+        // 担当する人一人が休める日数よりも関数reddayで設定した担当する人の入れない日付けが多ければ 例　日数が30日、担当する人が15人の場合　日数(30) - 担当する人一人あたりが休める日数(30/15) < 休みたい日数(29)
         for (var f = member_count - 1; f >= 0; f--) {
             if (month_days - Math.floor(month_days / member_count) < member_day[f].length) {
                 alert('全員に平等に当番を分けられません。やり直してください。')
@@ -254,13 +259,17 @@
                 for (var n = 0; n < member_count; n++) {
                     possible.push(n);
                 }
+                // 一日多く担当する人の残り人数
                 var remainder_eliminate = month_days % member_count;
                 for (var remove_member = member_count - 1; remove_member >= 0; remove_member--) {
+                    // 一日多く担当する人が全員決まっていないなら
                     if (remainder_eliminate != 0) {
                         // ceil 小数点以下の切り上げ
                         // すでに担当する人一人が当番に入る最大日数に達している人を候補から消していく
                         if (Math.ceil(month_days / member_count) == touban_count[remove_member]) {
+                            // splice(何番目の要素から,いくつ削除する)
                             possible.splice(remove_member,1);
+                            // 一日多く担当する人の残り人数を一人減らす
                             remainder_eliminate--
                         }
                     } else {
@@ -271,7 +280,6 @@
                     // 関数reddayで設定した担当する人の入れない日付けとdateが等しいときその担当する人を候補から消していく
                     for (var j = 0; j < member_day[remove_member].length; j++) {
                         if (date == member_day[remove_member][j]) {
-                            // splice(何番目の要素から,いくつ削除する)
                             possible.splice(remove_member,1);
                             break;
                         }
@@ -310,9 +318,9 @@
         for (var i = 1; i < month_days + 1; i++) {
             // テーブルの行を取得する
             let newRow = table.insertRow();
-            // テーブルの左のセルを取得する
+            // テーブルの一つ目(左)のセルを取得する
             let newCell = newRow.insertCell();
-            // テーブルの右のセルを取得する
+            // テーブル二つ目(右)のセルを取得する
             let newCell_2 = newRow.insertCell();
             // セルの日付の曜日を取得する
             var dayOfWeek_now = new Date(year_selected, month_selected - 1, i).getDay();
@@ -335,8 +343,11 @@
     // もう一度当番表を作る
     function onemore() {
         var table = document.getElementById('table');
+        // 当番表のテーブルの行を取得
         var second_table_row = table.rows;
+        // 当番表のテーブルの2行目以降の
         for (var i = second_table_row.length - 1; i >= 1; i--) {
+            // 当番表のテーブルの行を消去する
             table.deleteRow(i);
         }
         result();
