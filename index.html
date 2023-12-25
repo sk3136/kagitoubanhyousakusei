@@ -12,7 +12,7 @@
         var now = new Date();
         // nowから年を取得
         var year = now.getFullYear();
-        // nowから月を取得1月が0なので+1
+        // nowから月を取得　1月が0なので+1
         var month = now.getMonth() + 1;
 
         // 担当する人の人数を入力するセレクトボックスを表示する
@@ -83,9 +83,9 @@
             for (var i = 0; i < 7; i++) {
                 // カレンダーのセルを取得（カレンダーの行にカレンダーのセルを追加する）
                 let newCell = newRow.insertCell();
-                // セルのテキストの数値が1以上なら
-                if (date >= 1) {
-                    // newCellにid（i）を付与する　setAttribute('付与する属性の名前',属性の中身);　setAttribute('idを',iから曜日で増えた日数を引いた数値にする')
+                // セルのテキストの数値が1以上かつ選択した月の日数以下なら
+                if (date >= 1 && date <= last_day) {
+                    // newCellにid（date）を付与する　setAttribute('付与する属性の名前',属性の中身);　setAttribute('idを',現在作っているセルの中身にする')
                     newCell.setAttribute('id',date);
                     // セルがクリックされたとき
                     newCell.onclick = function() {
@@ -121,6 +121,7 @@
 
     // 表示される担当する人の名前
     var member = [];
+    // 選択された人数分の名前を入力する
     function member_name() {
         for (var i = 0; i < member.length; i++) {
             // これまでに入力された名前と入力された名前が重複した時
@@ -246,7 +247,7 @@
             var touban = [];
             // 担当する人が当番に入る日数をそれぞれ数える　例　[1,2,3] の場合 一人目の担当する人が一日、二人目の担当する人が二日、三人目の担当する人が三日間当番に入ったということ
             var touban_count = [];
-            // その日に当番に入れる担当する人　例　[0,2,3] の場合番号が0,2,3の担当する人はその日に当番に入れるということ
+            // その日に当番に入れる担当する人　例　[0,2,3] の場合 番号が0,2,3の担当する人はその日に当番に入れるということ
             var possible = [];
             // 担当する人が当番に入った日数をそれぞれ0にする
             for (var i = 0; i < member_count; i++) {
@@ -255,7 +256,7 @@
 
             for (var date = 1; date < month_days + 1; date++) {
                 possible = [];
-                // 担当する人全員をpossibleに追加する
+                // 担当する人全員の番号をpossibleに追加する
                 for (var n = 0; n < member_count; n++) {
                     possible.push(n);
                 }
@@ -279,7 +280,7 @@
                     }
                     // 関数reddayで設定した担当する人の入れない日付けとdateが等しいときその担当する人を候補から消していく
                     for (var j = 0; j < member_day[remove_member].length; j++) {
-                        if (date == member_day[remove_member][j]) {
+                        if (member_day[remove_member][j] == date) {
                             possible.splice(remove_member,1);
                             break;
                         }
@@ -296,7 +297,7 @@
 
                 // Math.floor　小数点以下を切り捨て　Math.random() 0からpossible.length未満の値の整数の乱数を作る
                 var random = Math.floor(Math.random() * possible.length);
-                // ランダムに選ばれた0~possible.length未満の値の整数をtoubanに追加
+                // possibleの[ランダムに選ばれた0~possible.length未満の整数]番目をtoubanに追加
                 touban.push(possible[random]);
                 // 担当する人ごとの割り振られた日数を1増やす
                 touban_count[possible[random]]++
@@ -420,7 +421,7 @@ input {
 <body>
 <h1>鍵当番表作成アプリ</h1>
 
-<!-- 人数・年・月・連続許容回数の登録画面 -->
+<!-- 人数・年・月の登録画面 -->
 <div id="start" class="start">
 <p>鍵当番を担当する人の<br>人数を選んでください</p>
 <select id="member"></select>
