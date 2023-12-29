@@ -78,10 +78,10 @@
         var last_day = month_days_Number(month_Number + 1);
         var date = 1 - first_dayOfWeek;
         while (date <= last_day) {
-            // カレンダーの行を取得（カレンダーにカレンダーの行を追加する）
+            // カレンダーの行を追加する
             let newRow = calendar.insertRow();
             for (var i = 0; i < 7; i++) {
-                // カレンダーのセルを取得（カレンダーの行にカレンダーのセルを追加する）
+                // カレンダーのセルを追加する
                 let newCell = newRow.insertCell();
                 // セルのテキストの数値が1以上かつ選択した月の日数以下なら
                 if (date >= 1 && date <= last_day) {
@@ -261,17 +261,17 @@
                     possible.push(n);
                 }
                 // 一日多く担当する人の残り人数
-                var remainder_eliminate = month_days % member_count;
+                var remainder = month_days % member_count;
                 for (var remove_member = member_count - 1; remove_member >= 0; remove_member--) {
                     // 一日多く担当する人が全員決まっていないなら
-                    if (remainder_eliminate != 0) {
+                    if (remainder != 0) {
                         // ceil 小数点以下の切り上げ
                         // すでに担当する人一人が当番に入る最大日数に達している人を候補から消していく
                         if (Math.ceil(month_days / member_count) == touban_count[remove_member]) {
                             // splice(何番目の要素から,いくつ削除する)
                             possible.splice(remove_member,1);
                             // 一日多く担当する人の残り人数を一人減らす
-                            remainder_eliminate--
+                            remainder--
                         }
                     } else {
                         if (Math.floor(month_days / member_count) == touban_count[remove_member]) {
@@ -317,11 +317,14 @@
         var dayOfWeek_kanji = ['日','月','火','水','木','金','土'];
         let table = document.getElementById('table');
         for (var i = 1; i < month_days + 1; i++) {
-            // テーブルの行を取得する
+            if (i > Math.ceil(month_days / 2)) {
+                table = document.getElementById('table_2');
+            }
+            // テーブルの行を追加する
             let newRow = table.insertRow();
-            // テーブルの一つ目(左)のセルを取得する
+            // テーブルの一つ目(左)のセルを追加する
             let newCell = newRow.insertCell();
-            // テーブル二つ目(右)のセルを取得する
+            // テーブル二つ目(右)のセルを追加する
             let newCell_2 = newRow.insertCell();
             // セルの日付の曜日を取得する
             var dayOfWeek_now = new Date(year_selected, month_selected - 1, i).getDay();
@@ -344,12 +347,19 @@
     // もう一度当番表を作る
     function onemore() {
         var table = document.getElementById('table');
+        var table_2 = document.getElementById('table_2');
         // 当番表のテーブルの行を取得
         var second_table_row = table.rows;
+        var second_table_row_2 = table_2.rows;
         // 当番表のテーブルの2行目以降の
         for (var i = second_table_row.length - 1; i >= 1; i--) {
             // 当番表のテーブルの行を消去する
             table.deleteRow(i);
+        }
+        // 当番表のテーブルの2行目以降の
+        for (var i = second_table_row_2.length - 1; i >= 1; i--) {
+            // 当番表のテーブルの行を消去する
+            table_2.deleteRow(i);
         }
         result();
     }
@@ -467,11 +477,14 @@ input {
 
 <!-- 当番表 -->
 <div id="result">
+<p><a id="month"></a>月の当番表</p>
 <button onclick="onemore()">別の候補を表示</button>
 <table id="table" class="last_calendar">
     <tr>
-        <th>日（曜日）</th>
-        <th><a id="month"></a>月</th>
+    </tr>
+</table>
+<table id="table_2" class="last_calendar">
+    <tr>
     </tr>
 </table>
 </div>
